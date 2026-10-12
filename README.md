@@ -38,14 +38,25 @@ A full-stack web application built with **HTML, CSS, JavaScript**, **Node.js (Ex
 
 ---
 
-## Setup & Installation
+## Run with Docker Compose
+
+```bash
+docker compose up --build
+```
+
+- **App URL**: `http://localhost:5000`
+- **MySQL Container**: Port `3306` (`mysql:8.4`)
+
+---
+
+## Run Locally (Without Docker)
 
 ### 1. Prerequisites
 - **Node.js** (v18+ recommended)
 - **MySQL Server** running on `localhost:3306`
 
 ### 2. Configure Environment Variables
-Copy `backend/.env.example` to `backend/.env` and update your MySQL credentials if needed:
+Copy `backend/.env.example` to `backend/.env`:
 
 ```env
 PORT=5000
@@ -65,7 +76,6 @@ npm start
 ```
 
 ### 4. Open in Browser
-Navigate to:
 ```
 http://localhost:5000
 ```
