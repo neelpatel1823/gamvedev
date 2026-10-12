@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Teams | Team &amp; Game Portal</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="brand">Team &amp; Game Manager</a>
+      <div class="nav-links">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="teams.html" class="nav-link active">Teams</a>
+        <a href="create-team.html" class="nav-link">Create Team</a>
+        <a href="edit-team.html" class="nav-link">Edit Team</a>
+        <a href="games.html" class="nav-link">Games</a>
+        <a href="create-game.html" class="nav-link">Create Game</a>
+        <a href="edit-game.html" class="nav-link">Edit Game</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container">
+    <section class="page-header">
+      <div>
+        <h1>All Teams</h1>
+        <p>View all registered teams, inspect their budgets, edit details, or delete a team.</p>
+      </div>
+      <a href="create-team.html" class="btn">+ Create Team</a>
+    </section>
+
+    <section class="section">
+      <div id="teams-grid" class="items-grid">
+        <div class="empty-box">Loading teams...</div>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script>
+    const grid = document.getElementById('teams-grid');
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    async function loadTeams() {
+      try {
+        const teams = await TeamsAPI.getAll();
+        if (!teams.length) {
+          grid.innerHTML = '<div class="empty-box">No teams found. Click "+ Create Team" to add one.</div>';
+          return;
+        }
+
+        grid.innerHTML = teams
+          .map(
+            (t) => `
+            <div class="card">
+              <div>
+                <div class="card-top">
+                  <h3>${escapeHtml(t.name)}</h3>
+                  <span class="badge badge-green">Budget: ₹${t.budget}</span>
+                </div>
+                <p>${escapeHtml(t.description || 'No description provided.')}</p>
+              </div>
+              <div class="card-actions">
+                <a href="edit-team.html?id=${t.id}" class="btn btn-secondary">Edit</a>
+                <button class="btn btn-danger" onclick="deleteTeam(${t.id})">Delete</button>
+              </div>
+            </div>
+          `
+          )
+          .join('');
+      } catch (err) {
+        grid.innerHTML = `<div class="empty-box">Error: ${escapeHtml(err.message)}</div>`;
+      }
+    }
+
+    async function deleteTeam(id) {
+      try {
+        await TeamsAPI.delete(id);
+        loadTeams();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    loadTeams();
+  </script>
+</body>
+</html>

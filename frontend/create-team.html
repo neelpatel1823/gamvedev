@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Team | Team &amp; Game Portal</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="brand">Team &amp; Game Manager</a>
+      <div class="nav-links">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="teams.html" class="nav-link">Teams</a>
+        <a href="create-team.html" class="nav-link active">Create Team</a>
+        <a href="edit-team.html" class="nav-link">Edit Team</a>
+        <a href="games.html" class="nav-link">Games</a>
+        <a href="create-game.html" class="nav-link">Create Game</a>
+        <a href="edit-game.html" class="nav-link">Edit Game</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container">
+    <section class="page-header">
+      <div>
+        <h1>Create Team</h1>
+        <p>Fill out the form below to register a new team with its description and budget.</p>
+      </div>
+      <a href="teams.html" class="btn btn-secondary">Back to Teams</a>
+    </section>
+
+    <section class="section">
+      <div class="form-box">
+        <form id="create-team-form">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="team-name">Team Name</label>
+              <input type="text" id="team-name" placeholder="Enter team name" required />
+            </div>
+
+            <div class="form-group">
+              <label for="team-budget">Team Budget (₹)</label>
+              <input type="number" id="team-budget" step="0.01" placeholder="Enter budget amount" required />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="team-description">Team Description</label>
+            <textarea id="team-description" placeholder="Write a short description about the team" required></textarea>
+          </div>
+
+          <button type="submit">Create Team</button>
+          <a href="teams.html" class="btn btn-secondary">Cancel</a>
+          <div id="status" class="status-msg"></div>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script>
+    const form = document.getElementById('create-team-form');
+    const statusEl = document.getElementById('status');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      statusEl.textContent = 'Saving...';
+
+      const payload = {
+        name: document.getElementById('team-name').value.trim(),
+        description: document.getElementById('team-description').value.trim(),
+        budget: document.getElementById('team-budget').value,
+      };
+
+      try {
+        await TeamsAPI.create(payload);
+        window.location.href = 'teams.html';
+      } catch (err) {
+        statusEl.textContent = 'Error: ' + err.message;
+      }
+    });
+  </script>
+</body>
+</html>

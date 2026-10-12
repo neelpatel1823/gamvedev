@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Edit Game | Team &amp; Game Portal</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="brand">Team &amp; Game Manager</a>
+      <div class="nav-links">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="teams.html" class="nav-link">Teams</a>
+        <a href="create-team.html" class="nav-link">Create Team</a>
+        <a href="edit-team.html" class="nav-link">Edit Team</a>
+        <a href="games.html" class="nav-link">Games</a>
+        <a href="create-game.html" class="nav-link">Create Game</a>
+        <a href="edit-game.html" class="nav-link active">Edit Game</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container">
+    <section class="page-header">
+      <div>
+        <h1>Edit Game</h1>
+        <p>Update the game name, price, genre, platform, and description below.</p>
+      </div>
+      <a href="games.html" class="btn btn-secondary">Back to Games</a>
+    </section>
+
+    <section class="section">
+      <div class="form-box">
+        <div class="form-group" id="game-selector-group" style="display: none;">
+          <label for="select-game-id">Select Game</label>
+          <select id="select-game-id"></select>
+        </div>
+
+        <form id="edit-game-form">
+          <input type="hidden" id="game-id" />
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="game-name">Game Name</label>
+              <input type="text" id="game-name" required />
+            </div>
+
+            <div class="form-group">
+              <label for="game-price">Game Price (₹)</label>
+              <input type="number" id="game-price" step="0.01" required />
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="game-genre">Genre</label>
+              <input type="text" id="game-genre" />
+            </div>
+
+            <div class="form-group">
+              <label for="game-platform">Platform</label>
+              <input type="text" id="game-platform" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="game-description">Game Description</label>
+            <textarea id="game-description" required></textarea>
+          </div>
+
+          <button type="submit">Update Game</button>
+          <a href="games.html" class="btn btn-secondary">Cancel</a>
+          <div id="status" class="status-msg"></div>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const urlGameId = params.get('id');
+    const selectorGroup = document.getElementById('game-selector-group');
+    const selectGameEl = document.getElementById('select-game-id');
+    const form = document.getElementById('edit-game-form');
+    const statusEl = document.getElementById('status');
+
+    function populateForm(game) {
+      document.getElementById('game-id').value = game.id;
+      document.getElementById('game-name').value = game.name || '';
+      document.getElementById('game-description').value = game.description || '';
+      document.getElementById('game-price').value = game.price ?? 0;
+      document.getElementById('game-genre').value = game.genre || '';
+      document.getElementById('game-platform').value = game.platform || '';
+    }
+
+    async function initEditGamePage() {
+      try {
+        if (urlGameId) {
+          const game = await GamesAPI.getById(urlGameId);
+          populateForm(game);
+        } else {
+          const games = await GamesAPI.getAll();
+          if (games.length === 0) {
+            statusEl.textContent = 'No games available to edit.';
+            return;
+          }
+          selectorGroup.style.display = 'block';
+          selectGameEl.innerHTML = games
+            .map((g) => `<option value="${g.id}">${g.name}</option>`)
+            .join('');
+          populateForm(games[0]);
+
+          selectGameEl.addEventListener('change', async (e) => {
+            const selected = await GamesAPI.getById(e.target.value);
+            populateForm(selected);
+          });
+        }
+      } catch (err) {
+        statusEl.textContent = 'Error: ' + err.message;
+      }
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('game-id').value;
+      if (!id) return;
+
+      statusEl.textContent = 'Updating...';
+      const payload = {
+        name: document.getElementById('game-name').value.trim(),
+        description: document.getElementById('game-description').value.trim(),
+        price: document.getElementById('game-price').value,
+        genre: document.getElementById('game-genre').value.trim() || 'General',
+        platform: document.getElementById('game-platform').value.trim() || 'PC',
+      };
+
+      try {
+        await GamesAPI.update(id, payload);
+        window.location.href = 'games.html';
+      } catch (err) {
+        statusEl.textContent = 'Error: ' + err.message;
+      }
+    });
+
+    initEditGamePage();
+  </script>
+</body>
+</html>

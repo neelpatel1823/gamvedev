@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Edit Team | Team &amp; Game Portal</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="brand">Team &amp; Game Manager</a>
+      <div class="nav-links">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="teams.html" class="nav-link">Teams</a>
+        <a href="create-team.html" class="nav-link">Create Team</a>
+        <a href="edit-team.html" class="nav-link active">Edit Team</a>
+        <a href="games.html" class="nav-link">Games</a>
+        <a href="create-game.html" class="nav-link">Create Game</a>
+        <a href="edit-game.html" class="nav-link">Edit Game</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container">
+    <section class="page-header">
+      <div>
+        <h1>Edit Team</h1>
+        <p>Update the team name, budget, and description for the selected team.</p>
+      </div>
+      <a href="teams.html" class="btn btn-secondary">Back to Teams</a>
+    </section>
+
+    <section class="section">
+      <div class="form-box">
+        <div class="form-group" id="team-selector-group" style="display: none;">
+          <label for="select-team-id">Select Team</label>
+          <select id="select-team-id"></select>
+        </div>
+
+        <form id="edit-team-form">
+          <input type="hidden" id="team-id" />
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="team-name">Team Name</label>
+              <input type="text" id="team-name" required />
+            </div>
+
+            <div class="form-group">
+              <label for="team-budget">Team Budget (₹)</label>
+              <input type="number" id="team-budget" step="0.01" required />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="team-description">Team Description</label>
+            <textarea id="team-description" required></textarea>
+          </div>
+
+          <button type="submit">Update Team</button>
+          <a href="teams.html" class="btn btn-secondary">Cancel</a>
+          <div id="status" class="status-msg"></div>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const urlTeamId = params.get('id');
+    const selectorGroup = document.getElementById('team-selector-group');
+    const selectTeamEl = document.getElementById('select-team-id');
+    const form = document.getElementById('edit-team-form');
+    const statusEl = document.getElementById('status');
+
+    function populateForm(team) {
+      document.getElementById('team-id').value = team.id;
+      document.getElementById('team-name').value = team.name || '';
+      document.getElementById('team-description').value = team.description || '';
+      document.getElementById('team-budget').value = team.budget ?? 0;
+    }
+
+    async function initEditTeamPage() {
+      try {
+        if (urlTeamId) {
+          const team = await TeamsAPI.getById(urlTeamId);
+          populateForm(team);
+        } else {
+          const teams = await TeamsAPI.getAll();
+          if (teams.length === 0) {
+            statusEl.textContent = 'No teams available to edit.';
+            return;
+          }
+          selectorGroup.style.display = 'block';
+          selectTeamEl.innerHTML = teams
+            .map((t) => `<option value="${t.id}">${t.name}</option>`)
+            .join('');
+          populateForm(teams[0]);
+
+          selectTeamEl.addEventListener('change', async (e) => {
+            const selected = await TeamsAPI.getById(e.target.value);
+            populateForm(selected);
+          });
+        }
+      } catch (err) {
+        statusEl.textContent = 'Error: ' + err.message;
+      }
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('team-id').value;
+      if (!id) return;
+
+      statusEl.textContent = 'Updating...';
+      const payload = {
+        name: document.getElementById('team-name').value.trim(),
+        description: document.getElementById('team-description').value.trim(),
+        budget: document.getElementById('team-budget').value,
+      };
+
+      try {
+        await TeamsAPI.update(id, payload);
+        window.location.href = 'teams.html';
+      } catch (err) {
+        statusEl.textContent = 'Error: ' + err.message;
+      }
+    });
+
+    initEditTeamPage();
+  </script>
+</body>
+</html>

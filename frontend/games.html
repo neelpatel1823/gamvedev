@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Games | Team &amp; Game Portal</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="brand">Team &amp; Game Manager</a>
+      <div class="nav-links">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="teams.html" class="nav-link">Teams</a>
+        <a href="create-team.html" class="nav-link">Create Team</a>
+        <a href="edit-team.html" class="nav-link">Edit Team</a>
+        <a href="games.html" class="nav-link active">Games</a>
+        <a href="create-game.html" class="nav-link">Create Game</a>
+        <a href="edit-game.html" class="nav-link">Edit Game</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container">
+    <section class="page-header">
+      <div>
+        <h1>All Games</h1>
+        <p>Browse all games in the catalog, check prices and genres, or edit and delete entries.</p>
+      </div>
+      <a href="create-game.html" class="btn btn-teal">+ Create Game</a>
+    </section>
+
+    <section class="section">
+      <div id="games-grid" class="items-grid">
+        <div class="empty-box">Loading games...</div>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script>
+    const grid = document.getElementById('games-grid');
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    async function loadGames() {
+      try {
+        const games = await GamesAPI.getAll();
+        if (!games.length) {
+          grid.innerHTML = '<div class="empty-box">No games found. Click "+ Create Game" to add one.</div>';
+          return;
+        }
+
+        grid.innerHTML = games
+          .map(
+            (g) => `
+            <div class="card">
+              <div>
+                <div class="card-top">
+                  <h3>${escapeHtml(g.name)}</h3>
+                  <span class="badge">Price: ₹${g.price}</span>
+                </div>
+                <div class="tag-row">
+                  <span class="badge badge-neutral">${escapeHtml(g.genre || 'General')}</span>
+                  <span class="badge badge-neutral">${escapeHtml(g.platform || 'PC')}</span>
+                </div>
+                <p>${escapeHtml(g.description || 'No description provided.')}</p>
+              </div>
+              <div class="card-actions">
+                <a href="edit-game.html?id=${g.id}" class="btn btn-secondary">Edit</a>
+                <button class="btn btn-danger" onclick="deleteGame(${g.id})">Delete</button>
+              </div>
+            </div>
+          `
+          )
+          .join('');
+      } catch (err) {
+        grid.innerHTML = `<div class="empty-box">Error: ${escapeHtml(err.message)}</div>`;
+      }
+    }
+
+    async function deleteGame(id) {
+      try {
+        await GamesAPI.delete(id);
+        loadGames();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    loadGames();
+  </script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+node_modules/
+backend/node_modules/
+mysql84/
+mysql_data/
+*.sqlite
+backend/.env
+.DS_Store
+Thumbs.db

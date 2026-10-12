@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Home | Team &amp; Game Portal</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="brand">Team &amp; Game Manager</a>
+      <div class="nav-links">
+        <a href="index.html" class="nav-link active">Home</a>
+        <a href="teams.html" class="nav-link">Teams</a>
+        <a href="create-team.html" class="nav-link">Create Team</a>
+        <a href="edit-team.html" class="nav-link">Edit Team</a>
+        <a href="games.html" class="nav-link">Games</a>
+        <a href="create-game.html" class="nav-link">Create Game</a>
+        <a href="edit-game.html" class="nav-link">Edit Game</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container">
+    <section class="hero-section">
+      <div>
+        <h1>Team &amp; Game Management</h1>
+        <p>Manage your teams, budgets, and game catalog connected to MySQL.</p>
+      </div>
+      <div>
+        <a href="create-team.html" class="btn">+ New Team</a>
+        <a href="create-game.html" class="btn btn-teal">+ New Game</a>
+      </div>
+    </section>
+
+    <section class="stats-grid">
+      <div class="stat-box">
+        <div class="stat-label">Total Teams</div>
+        <div class="stat-number" id="total-teams">0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Total Games</div>
+        <div class="stat-number" id="total-games">0</div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2 class="section-title">Team Management</h2>
+      <p class="section-desc">Create, view, update, and remove teams and budget details.</p>
+      <div class="grid-3">
+        <div class="card">
+          <div>
+            <h3>View All Teams</h3>
+            <p>Browse the list of registered teams, check budgets, or delete a team.</p>
+          </div>
+          <div class="card-actions">
+            <a href="teams.html" class="btn">Open Teams</a>
+          </div>
+        </div>
+
+        <div class="card">
+          <div>
+            <h3>Create Team</h3>
+            <p>Add a new team with team name, description, and budget details.</p>
+          </div>
+          <div class="card-actions">
+            <a href="create-team.html" class="btn">Create Team</a>
+          </div>
+        </div>
+
+        <div class="card">
+          <div>
+            <h3>Edit Team</h3>
+            <p>Select an existing team to update its name, description, or budget.</p>
+          </div>
+          <div class="card-actions">
+            <a href="edit-team.html" class="btn btn-secondary">Edit Team</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2 class="section-title">Game Management</h2>
+      <p class="section-desc">Manage your game catalog, pricing, genre, and platform details.</p>
+      <div class="grid-3">
+        <div class="card">
+          <div>
+            <h3>View All Games</h3>
+            <p>Browse all games in the database, view prices, or delete a game.</p>
+          </div>
+          <div class="card-actions">
+            <a href="games.html" class="btn btn-teal">Open Games</a>
+          </div>
+        </div>
+
+        <div class="card">
+          <div>
+            <h3>Create Game</h3>
+            <p>Add a new game with name, description, price, genre, and platform.</p>
+          </div>
+          <div class="card-actions">
+            <a href="create-game.html" class="btn btn-teal">Create Game</a>
+          </div>
+        </div>
+
+        <div class="card">
+          <div>
+            <h3>Edit Game</h3>
+            <p>Modify details, description, or price of an existing game.</p>
+          </div>
+          <div class="card-actions">
+            <a href="edit-game.html" class="btn btn-secondary">Edit Game</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script>
+    async function loadCounts() {
+      try {
+        const [teams, games] = await Promise.all([TeamsAPI.getAll(), GamesAPI.getAll()]);
+        document.getElementById('total-teams').textContent = teams.length;
+        document.getElementById('total-games').textContent = games.length;
+      } catch (_) {}
+    }
+    loadCounts();
+  </script>
+</body>
+</html>
